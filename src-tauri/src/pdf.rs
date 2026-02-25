@@ -1,6 +1,7 @@
 use headless_chrome::{Browser, LaunchOptions, types::PrintToPdfOptions};
 use std::fs;
 use std::path::Path;
+use std::time::Duration;
 
 pub fn html_to_pdf(html_path: &str, pdf_path: &str) -> Result<(), String> {
     html_to_pdf_with_options(html_path, pdf_path, false)
@@ -20,12 +21,19 @@ pub fn html_to_pdf_with_options(html_path: &str, pdf_path: &str, landscape: bool
         .map_err(|e| format!("Failed to create tab: {}", e))?;
 
     let file_url = format!("file:///{}", html_path.replace('\\', "/"));
-    
+
     tab.navigate_to(&file_url)
         .map_err(|e| format!("Failed to navigate: {}", e))?;
 
     tab.wait_until_navigated()
         .map_err(|e| format!("Failed to wait for navigation: {}", e))?;
+
+    // Wait for the content to actually render in the DOM
+    tab.wait_for_element("#notebook-container")
+        .map_err(|e| format!("Failed to wait for content: {}", e))?;
+
+    // Give the browser a moment to finish rendering (images, layout, etc.)
+    std::thread::sleep(Duration::from_millis(500));
 
     // Swap width/height for landscape
     let (paper_width, paper_height) = if landscape {
@@ -48,7 +56,7 @@ pub fn html_to_pdf_with_options(html_path: &str, pdf_path: &str, landscape: bool
         page_ranges: None,
         header_template: None,
         footer_template: None,
-        prefer_css_page_size: Some(true),  // Use CSS @page rules
+        prefer_css_page_size: Some(false),
         transfer_mode: None,
         generate_document_outline: None,
         generate_tagged_pdf: None,

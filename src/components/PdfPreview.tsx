@@ -29,23 +29,22 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
   }, [htmlPath]);
 
   const handleOpenInBrowser = async () => {
-    // Open the PDF file instead of HTML
     if (pdfPath) {
       try {
         await invoke('open_pdf_file', { path: pdfPath });
       } catch (err) {
-        console.error('Failed to open PDF in browser:', err);
+        console.error('Failed to open PDF:', err);
       }
     }
   };
 
   if (!pdfPath && !htmlPath) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>No PDF generated yet</p>
-          <p className="text-sm">Convert a notebook to see preview</p>
+          <FileText className="w-10 h-10 mx-auto mb-3 text-clay" />
+          <p className="text-dim text-sm font-medium">No PDF yet</p>
+          <p className="text-mute text-xs mt-1">Convert a notebook to preview</p>
         </div>
       </div>
     );
@@ -53,21 +52,20 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p>Loading preview...</p>
+          <div className="w-6 h-6 border-2 border-royal border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-dim text-sm">Loading preview...</p>
         </div>
       </div>
     );
   }
 
   if (htmlContent) {
-    // Inject CSS for proper display - allow scrolling within iframe
     const modifiedContent = htmlContent.replace(
       '</head>',
       `<style>
-        html, body { 
+        html, body {
           margin: 0 !important;
           padding: 20px !important;
           box-sizing: border-box !important;
@@ -77,20 +75,18 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
     );
 
     return (
-      <div className="h-full flex flex-col overflow-hidden bg-gray-200">
-        {/* Open in Browser button */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex justify-end">
+      <div className="h-full flex flex-col overflow-hidden bg-pearl">
+        <div className="flex-shrink-0 bg-snow border-b border-sand px-4 py-2 flex justify-end">
           <button
             onClick={handleOpenInBrowser}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-royal hover:bg-royal-soft rounded-md transition-all"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-3.5 h-3.5" />
             Open in Browser
           </button>
         </div>
-        {/* PDF-like preview with proper scrolling */}
-        <div className="flex-1 overflow-hidden p-6">
-          <div className="h-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="flex-1 overflow-hidden p-5">
+          <div className="h-full max-w-4xl mx-auto bg-white rounded-lg overflow-hidden shadow-xl shadow-black/8 border border-sand/50">
             <iframe
               srcDoc={modifiedContent}
               className="w-full h-full border-0 bg-white"
@@ -104,11 +100,11 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
   }
 
   return (
-    <div className="h-full flex items-center justify-center text-gray-400">
+    <div className="h-full flex items-center justify-center">
       <div className="text-center">
-        <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-        <p>PDF generated successfully</p>
-        <p className="text-sm">Click Download to save</p>
+        <FileText className="w-10 h-10 mx-auto mb-3 text-clay" />
+        <p className="text-dim text-sm font-medium">PDF generated</p>
+        <p className="text-mute text-xs mt-1">Click Download to save</p>
       </div>
     </div>
   );

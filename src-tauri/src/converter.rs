@@ -175,8 +175,6 @@ pub fn notebook_to_html_with_options(
         html_content.push_str("</div>");
     }
 
-    html_content.push_str("<div id=\"notebook-container\" class=\"container\">\n");
-
     for (i, cell) in notebook.cells.iter().enumerate() {
         match cell.cell_type.as_str() {
             "markdown" => {
@@ -481,11 +479,13 @@ const JUPYTER_HTML_HEAD: &str = r#"<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            margin-bottom: 20px;
+            padding: 6px 0;
+            margin-bottom: 12px;
             border-bottom: 1px solid #ddd;
             color: #666;
-            font-size: 10pt;
+            font-size: 9pt;
+            page-break-after: avoid;
+            break-after: avoid;
         }
 
         .pdf-header .author {
@@ -807,11 +807,13 @@ const DARK_THEME_CSS: &str = r#"<!DOCTYPE html>
         .pdf-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            margin-bottom: 20px;
+            padding: 6px 0;
+            margin-bottom: 12px;
             border-bottom: 1px solid #444;
             color: #888;
-            font-size: 10pt;
+            font-size: 9pt;
+            page-break-after: avoid;
+            break-after: avoid;
         }
 
         #notebook-container { max-width: 100%; margin: 0; padding: 0; }
@@ -891,11 +893,13 @@ const SOLARIZED_THEME_CSS: &str = r#"<!DOCTYPE html>
         .pdf-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            margin-bottom: 20px;
+            padding: 6px 0;
+            margin-bottom: 12px;
             border-bottom: 1px solid #eee8d5;
             color: #93a1a1;
-            font-size: 10pt;
+            font-size: 9pt;
+            page-break-after: avoid;
+            break-after: avoid;
         }
 
         #notebook-container { max-width: 100%; margin: 0; padding: 0; }

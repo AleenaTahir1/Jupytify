@@ -14,22 +14,24 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-16 bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 gap-2">
+    <div className="w-48 bg-linen border-r border-sand flex flex-col py-3 px-3 gap-0.5">
+      <div className="px-3 py-2 mb-2">
+        <p className="text-[10px] font-semibold text-mute uppercase tracking-widest">Navigation</p>
+      </div>
       {items.map((item) => (
         <button
           key={item.id}
           onClick={() => onViewChange(item.id)}
           className={`
-            w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all
-            ${activeView === item.id 
-              ? 'bg-blue-100 text-blue-600' 
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+            flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all
+            ${activeView === item.id
+              ? 'bg-royal text-white shadow-md shadow-royal/20'
+              : 'text-dim hover:text-ink hover:bg-sand/50'
             }
           `}
-          title={item.label}
         >
-          <item.icon className="w-5 h-5" />
-          <span className="text-[10px] font-medium">{item.label}</span>
+          <item.icon className="w-[18px] h-[18px]" />
+          {item.label}
         </button>
       ))}
     </div>

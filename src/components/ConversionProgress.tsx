@@ -10,44 +10,22 @@ interface ConversionProgressProps {
 export function ConversionProgress({ status, errorMessage }: ConversionProgressProps) {
   if (status === 'idle') return null;
 
-  const styles = {
-    converting: 'bg-blue-50 border-blue-200',
-    success: 'bg-green-50 border-green-200',
-    error: 'bg-red-50 border-red-200',
+  const config = {
+    converting: { border: 'border-l-royal', bg: 'bg-royal-soft/50', icon: <Loader2 className="w-5 h-5 text-royal animate-spin" />, title: 'Converting...', desc: 'This may take a moment' },
+    success: { border: 'border-l-clover', bg: 'bg-clover-soft', icon: <CheckCircle className="w-5 h-5 text-clover" />, title: 'Ready', desc: 'PDF generated successfully' },
+    error: { border: 'border-l-crimson', bg: 'bg-crimson-soft', icon: <XCircle className="w-5 h-5 text-crimson" />, title: 'Failed', desc: errorMessage || 'An error occurred' },
   };
 
+  const c = config[status];
+
   return (
-    <div className={`border rounded-xl p-4 ${styles[status]}`}>
-      <div className="flex items-center gap-4">
-        {status === 'converting' && (
-          <>
-            <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-            <div>
-              <p className="text-gray-800 font-medium">Converting...</p>
-              <p className="text-gray-500 text-sm">This may take a few seconds</p>
-            </div>
-          </>
-        )}
-        
-        {status === 'success' && (
-          <>
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            <div>
-              <p className="text-gray-800 font-medium">Conversion Complete!</p>
-              <p className="text-gray-500 text-sm">Your PDF is ready to download</p>
-            </div>
-          </>
-        )}
-        
-        {status === 'error' && (
-          <>
-            <XCircle className="w-6 h-6 text-red-600" />
-            <div>
-              <p className="text-gray-800 font-medium">Conversion Failed</p>
-              <p className="text-red-600 text-sm">{errorMessage || 'An error occurred'}</p>
-            </div>
-          </>
-        )}
+    <div className={`border-l-4 ${c.border} ${c.bg} rounded-r-lg p-3.5`}>
+      <div className="flex items-center gap-3">
+        <div className="flex-shrink-0">{c.icon}</div>
+        <div>
+          <p className="text-ink text-sm font-medium">{c.title}</p>
+          <p className={`text-xs mt-0.5 ${status === 'error' ? 'text-crimson/80' : 'text-dim'}`}>{c.desc}</p>
+        </div>
       </div>
     </div>
   );

@@ -6,69 +6,60 @@ export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
 
   const handleMinimize = async () => {
-    const window = getCurrentWindow();
-    await window.minimize();
+    await getCurrentWindow().minimize();
   };
 
   const handleMaximize = async () => {
-    const window = getCurrentWindow();
-    const maximized = await window.isMaximized();
+    const win = getCurrentWindow();
+    const maximized = await win.isMaximized();
     if (maximized) {
-      await window.unmaximize();
+      await win.unmaximize();
       setIsMaximized(false);
     } else {
-      await window.maximize();
+      await win.maximize();
       setIsMaximized(true);
     }
   };
 
   const handleClose = async () => {
-    const window = getCurrentWindow();
-    await window.close();
+    await getCurrentWindow().close();
   };
 
   return (
-    <div 
-      data-tauri-drag-region 
-      className="h-10 bg-white border-b border-gray-200 flex items-center justify-between px-3 select-none"
+    <div
+      data-tauri-drag-region
+      className="h-11 bg-snow border-b border-sand flex items-center justify-between px-4 select-none"
     >
-      {/* Logo and Title */}
-      <div className="flex items-center gap-2" data-tauri-drag-region>
-        <img src="/logo.svg" alt="Jupytify" className="w-6 h-6" />
-        <span className="text-gray-700 font-semibold text-sm" data-tauri-drag-region>
+      <div className="flex items-center gap-2.5" data-tauri-drag-region>
+        <img src="/logo.svg" alt="Jupytify" className="w-5 h-5" />
+        <span className="text-ink font-semibold text-[13px] tracking-wide" data-tauri-drag-region>
           Jupytify
         </span>
       </div>
 
-      {/* Spacer for drag region */}
       <div className="flex-1" data-tauri-drag-region />
 
-      {/* Window Controls */}
-      <div className="flex items-center">
+      <div className="flex items-center -mr-1">
         <button
           onClick={handleMinimize}
-          className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
+          className="w-11 h-11 flex items-center justify-center text-mute hover:text-ink hover:bg-pearl transition-colors"
           title="Minimize"
         >
-          <Minus className="w-4 h-4 text-gray-600" />
+          <Minus className="w-4 h-4" />
         </button>
         <button
           onClick={handleMaximize}
-          className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
+          className="w-11 h-11 flex items-center justify-center text-mute hover:text-ink hover:bg-pearl transition-colors"
           title={isMaximized ? "Restore" : "Maximize"}
         >
-          {isMaximized ? (
-            <Copy className="w-3.5 h-3.5 text-gray-600" />
-          ) : (
-            <Square className="w-3.5 h-3.5 text-gray-600" />
-          )}
+          {isMaximized ? <Copy className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
         </button>
         <button
           onClick={handleClose}
-          className="w-10 h-10 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors group"
+          className="w-11 h-11 flex items-center justify-center text-mute hover:text-white hover:bg-crimson transition-colors"
           title="Close"
         >
-          <X className="w-4 h-4 text-gray-600 group-hover:text-white" />
+          <X className="w-4 h-4" />
         </button>
       </div>
     </div>

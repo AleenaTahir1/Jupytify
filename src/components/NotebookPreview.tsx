@@ -31,11 +31,11 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
 
   if (!content) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>No notebook loaded</p>
-          <p className="text-sm">Upload a .ipynb file to preview</p>
+          <FileText className="w-10 h-10 mx-auto mb-3 text-clay" />
+          <p className="text-dim text-sm font-medium">No notebook loaded</p>
+          <p className="text-mute text-xs mt-1">Upload a .ipynb file to preview</p>
         </div>
       </div>
     );
@@ -43,8 +43,8 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
 
   if (!notebook) {
     return (
-      <div className="h-full flex items-center justify-center text-red-400">
-        <p>Failed to parse notebook</p>
+      <div className="h-full flex items-center justify-center">
+        <p className="text-crimson text-sm">Failed to parse notebook</p>
       </div>
     );
   }
@@ -57,8 +57,8 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
     if (output.output_type === 'stream') {
       const text = Array.isArray(output.text) ? output.text.join('') : output.text;
       return (
-        <div key={idx} className="bg-gray-50 border-l-4 border-green-400 p-3 mt-2 text-sm font-mono overflow-x-auto">
-          <pre className="whitespace-pre-wrap">{text}</pre>
+        <div key={idx} className="bg-clover-soft border-l-3 border-clover/30 p-3 mt-2 text-xs font-mono overflow-x-auto rounded-r">
+          <pre className="whitespace-pre-wrap text-ink/80">{text}</pre>
         </div>
       );
     }
@@ -66,40 +66,40 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
       if (output.data?.['image/png']) {
         return (
           <div key={idx} className="mt-2 flex justify-center">
-            <img 
-              src={`data:image/png;base64,${output.data['image/png'].replace(/\n/g, '')}`} 
-              alt="Output" 
-              className="max-w-full max-h-64 object-contain"
+            <img
+              src={`data:image/png;base64,${output.data['image/png'].replace(/\n/g, '')}`}
+              alt="Output"
+              className="max-w-full max-h-64 object-contain rounded"
             />
           </div>
         );
       }
       if (output.data?.['text/html']) {
-        const html = Array.isArray(output.data['text/html']) 
-          ? output.data['text/html'].join('') 
+        const html = Array.isArray(output.data['text/html'])
+          ? output.data['text/html'].join('')
           : output.data['text/html'];
         return (
-          <div 
-            key={idx} 
-            className="mt-2 overflow-x-auto text-sm"
+          <div
+            key={idx}
+            className="mt-2 overflow-x-auto text-xs bg-pearl rounded p-2"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         );
       }
       if (output.data?.['text/plain']) {
-        const text = Array.isArray(output.data['text/plain']) 
-          ? output.data['text/plain'].join('') 
+        const text = Array.isArray(output.data['text/plain'])
+          ? output.data['text/plain'].join('')
           : output.data['text/plain'];
         return (
-          <div key={idx} className="bg-gray-50 p-3 mt-2 text-sm font-mono overflow-x-auto">
-            <pre className="whitespace-pre-wrap">{text}</pre>
+          <div key={idx} className="bg-pearl p-3 mt-2 text-xs font-mono overflow-x-auto rounded">
+            <pre className="whitespace-pre-wrap text-ink/70">{text}</pre>
           </div>
         );
       }
     }
     if (output.output_type === 'error') {
       return (
-        <div key={idx} className="bg-red-50 border-l-4 border-red-400 p-3 mt-2 text-sm font-mono text-red-700 overflow-x-auto">
+        <div key={idx} className="bg-crimson-soft border-l-3 border-crimson/30 p-3 mt-2 text-xs font-mono text-crimson/80 overflow-x-auto rounded-r">
           <pre className="whitespace-pre-wrap">{output.traceback?.join('\n') || output.evalue}</pre>
         </div>
       );
@@ -108,48 +108,45 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
   };
 
   return (
-    <div className="h-full overflow-auto p-4 space-y-4">
+    <div className="h-full overflow-auto p-4 space-y-3">
       {notebook.cells.map((cell, index) => (
-        <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-          {/* Cell Header */}
-          <div className="bg-gray-50 px-3 py-1.5 flex items-center gap-2 border-b border-gray-200">
+        <div key={index} className="bg-snow border border-sand/80 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-pearl px-3 py-1.5 flex items-center gap-2 border-b border-sand/60">
             {cell.cell_type === 'code' ? (
               <>
-                <Code className="w-4 h-4 text-blue-500" />
-                <span className="text-xs text-gray-500">
-                  In [{cell.execution_count ?? ' '}]:
+                <Code className="w-3.5 h-3.5 text-royal" />
+                <span className="text-[11px] text-dim font-mono">
+                  In [{cell.execution_count ?? ' '}]
                 </span>
               </>
             ) : cell.cell_type === 'markdown' ? (
               <>
-                <FileText className="w-4 h-4 text-purple-500" />
-                <span className="text-xs text-gray-500">Markdown</span>
+                <FileText className="w-3.5 h-3.5 text-violet-500" />
+                <span className="text-[11px] text-dim">Markdown</span>
               </>
             ) : (
               <>
-                <FileText className="w-4 h-4 text-gray-500" />
-                <span className="text-xs text-gray-500">Raw</span>
+                <FileText className="w-3.5 h-3.5 text-mute" />
+                <span className="text-[11px] text-dim">Raw</span>
               </>
             )}
           </div>
 
-          {/* Cell Content */}
           <div className="p-3">
             {editable ? (
               <textarea
-                className="w-full min-h-[80px] p-2 font-mono text-sm bg-white border border-gray-200 rounded resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full min-h-[80px] p-2 font-mono text-xs bg-pearl border border-sand rounded resize-y text-ink focus:outline-none focus:border-royal/40 focus:ring-1 focus:ring-royal/20"
                 value={getCellSource(cell.source)}
                 onChange={(e) => onCellEdit?.(index, e.target.value)}
               />
             ) : (
-              <pre className="font-mono text-sm whitespace-pre-wrap overflow-x-auto">
+              <pre className="font-mono text-xs whitespace-pre-wrap overflow-x-auto text-ink/80">
                 {getCellSource(cell.source)}
               </pre>
             )}
 
-            {/* Outputs */}
             {cell.outputs && cell.outputs.length > 0 && (
-              <div className="mt-3 border-t border-gray-100 pt-3">
+              <div className="mt-3 border-t border-sand/40 pt-3">
                 {cell.outputs.map((output, idx) => renderOutput(output, idx))}
               </div>
             )}

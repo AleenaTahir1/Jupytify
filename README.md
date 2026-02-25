@@ -16,6 +16,28 @@ A beautiful desktop app for converting `.ipynb` files to high-quality PDFs.
 
 ---
 
+## Screenshots
+
+### Upload
+![Upload](public/upload.png)
+
+### Notebook Preview
+![Notebook Preview](public/notebook_preview.png)
+
+### PDF Preview
+![PDF Preview](public/pdf_preview.png)
+
+### Conversion History
+![History](public/History.png)
+
+### Settings
+![Settings](public/settings.png)
+
+### Help
+![Help](public/help.png)
+
+---
+
 ## Why Jupytify?
 
 Converting Jupyter notebooks to PDF shouldn't require complex setups, LaTeX installations, or command-line tools. Jupytify provides a simple, beautiful interface to convert your notebooks with:

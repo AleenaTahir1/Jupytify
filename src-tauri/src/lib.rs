@@ -44,9 +44,9 @@ async fn convert_notebook(
     let temp_path = env::temp_dir().join("jupytify");
     fs::create_dir_all(&temp_path).map_err(|e| format!("Failed to create temp dir: {}", e))?;
     
-    let html_path = temp_path.join("notebook.html");
-    let pdf_name = file_name.replace(".ipynb", ".pdf");
-    let pdf_path = temp_path.join(&pdf_name);
+    let base_name = file_name.replace(".ipynb", "");
+    let html_path = temp_path.join(format!("{}.html", base_name));
+    let pdf_path = temp_path.join(format!("{}.pdf", base_name));
 
     fs::write(&html_path, &html_content)
         .map_err(|e| format!("Failed to write HTML: {}", e))?;
