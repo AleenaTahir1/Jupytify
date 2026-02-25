@@ -1,6 +1,6 @@
-# Contributing to PinNotes
+# Contributing to Jupytify
 
-First off, thank you for considering contributing to PinNotes! It's people like you that make PinNotes such a great tool.
+First off, thank you for considering contributing to Jupytify! It's people like you that make Jupytify such a great tool.
 
 ## Code of Conduct
 
@@ -38,8 +38,8 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment:**
  - OS: [e.g., Windows 11]
- - PinNotes Version: [e.g., 0.1.0]
- - Note Count: [e.g., 15 notes]
+ - Jupytify Version: [e.g., 0.1.0]
+ - Notebook Size: [e.g., 50 cells]
 
 **Additional context**
 Add any other context about the problem here.
@@ -75,8 +75,8 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/Pin-Notes.git
-cd Pin-Notes
+git clone https://github.com/YOUR_USERNAME/Jupytify.git
+cd Jupytify
 
 # Install dependencies
 npm install
@@ -88,26 +88,23 @@ npm run tauri dev
 ### Project Structure
 
 ```
-PinNotes/
+Jupytify/
 ├── src/                    # Frontend (React + TypeScript)
 │   ├── components/         # UI components
-│   │   ├── NoteWindow.tsx  # Individual sticky note
-│   │   ├── NotesList.tsx   # Notes list panel
-│   │   ├── NoteEditor.tsx  # Note content editor
-│   │   ├── ColorPicker.tsx # Note color selection
-│   │   ├── HighlighterPicker.tsx  # Text highlight colors
-│   │   └── MarkdownRenderer.tsx   # Markdown preview
-│   ├── hooks/              # Custom React hooks
-│   ├── store/              # Zustand state management
-│   └── styles/             # CSS styles
+│   │   ├── TitleBar.tsx    # Custom window titlebar
+│   │   ├── Sidebar.tsx     # Navigation sidebar
+│   │   ├── DocumentTabs.tsx # Multi-document tabs
+│   │   ├── FileUpload.tsx  # Drag & drop file upload
+│   │   ├── NotebookPreview.tsx  # Notebook viewer/editor
+│   │   ├── PdfPreview.tsx  # PDF preview panel
+│   │   └── ConversionProgress.tsx # Status indicator
+│   ├── App.tsx             # Main application
+│   └── main.tsx            # Entry point
 ├── src-tauri/              # Backend (Rust)
 │   └── src/
-│       ├── lib.rs          # App setup and plugin registration
-│       ├── commands.rs     # Tauri IPC command handlers
-│       ├── storage.rs      # JSON file persistence
-│       ├── window.rs       # Frameless window creation
-│       ├── hotkey.rs       # Global shortcut registration
-│       └── tray.rs         # System tray menu
+│       ├── lib.rs          # Tauri commands and setup
+│       ├── converter.rs    # Notebook to HTML conversion
+│       └── pdf.rs          # HTML to PDF generation
 └── package.json
 ```
 
@@ -130,10 +127,10 @@ PinNotes/
 
 ### CSS
 
-- Use Handwriting fonts and Neumorphic design
-- Follow the style patterns defined in `src/styles/`
-- Use the color palette defined in `types.ts` (`NOTE_COLORS`, `HIGHLIGHTER_COLORS`)
-- Maintain the soft, pastel aesthetic across components
+- Use TailwindCSS for styling
+- Follow the existing light theme design
+- Maintain consistent spacing and colors
+- Keep the UI clean and professional
 
 ### Commits
 
@@ -143,10 +140,10 @@ PinNotes/
 
 **Examples:**
 ```
-Add support for custom note colors
-Fix note window dragging on multi-monitor setups
-Update highlighter picker UI
-Remove deprecated font option
+Add support for dark theme
+Fix PDF generation for large notebooks
+Update syntax highlighting colors
+Remove deprecated conversion method
 ```
 
 ## Testing
@@ -156,7 +153,7 @@ Before submitting a PR:
 1. Ensure the app builds: `npm run build`
 2. Test in development: `npm run tauri dev`
 3. Test the production build: `npm run tauri build`
-4. Test with various note colors, fonts, and highlighter combinations
+4. Test with various notebook sizes and cell types
 
 ## Getting Help
 
@@ -171,4 +168,4 @@ Contributors will be recognized in:
 - Release notes
 - The app's About section
 
-Thank you for contributing to PinNotes!
+Thank you for contributing to Jupytify!

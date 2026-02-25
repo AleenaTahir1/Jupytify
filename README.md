@@ -1,64 +1,50 @@
 <div align="center">
 
-<img src="src-tauri/icons/128x128.png" alt="PinNotes Logo" width="100" />
+<img src="src-tauri/icons/128x128.png" alt="Jupytify Logo" width="100" />
 
-# PinNotes
+# Jupytify
 
-**Floating sticky notes for Windows**
+**Convert Jupyter Notebooks to PDF with ease**
 
-Pin notes to your desktop — always on top, always within reach.
+A beautiful desktop app for converting `.ipynb` files to high-quality PDFs.
 
-[![Release](https://img.shields.io/github/v/release/AleenaTahir1/Pin-Notes)](https://github.com/AleenaTahir1/Pin-Notes/releases)
-[![Build](https://img.shields.io/github/actions/workflow/status/AleenaTahir1/Pin-Notes/ci.yml)](https://github.com/AleenaTahir1/Pin-Notes/actions)
+[![Release](https://img.shields.io/github/v/release/AleenaTahir1/Jupytify)](https://github.com/AleenaTahir1/Jupytify/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/AleenaTahir1/Jupytify/ci.yml)](https://github.com/AleenaTahir1/Jupytify/actions)
 [![License](https://img.shields.io/badge/license-Source%20Available-blue)](LICENSE.txt)
 
 </div>
 
 ---
 
-## Screenshots
+## Why Jupytify?
 
-### Notes List
+Converting Jupyter notebooks to PDF shouldn't require complex setups, LaTeX installations, or command-line tools. Jupytify provides a simple, beautiful interface to convert your notebooks with:
 
-<p align="center">
-  <img src="Screenshots/notes-list.png" alt="PinNotes Notes List" width="280" />
-</p>
-
-### Note Window
-
-<p align="center">
-  <img src="Screenshots/note-window.png" alt="PinNotes Note Window" width="280" />
-</p>
-
----
-
-## Why PinNotes
-
-You have thoughts, tasks, and quick reminders scattered across apps, browser tabs, and text files. Nothing stays visible. Nothing stays handy.
-
-PinNotes gives you floating sticky notes that pin to your desktop — always on top of other windows. Jot something down, pick a color, and it stays right where you need it. No accounts, no cloud, no clutter.
+- **High-quality output** — Syntax highlighting, proper code formatting, and beautiful markdown rendering
+- **Live preview** — See your notebook and PDF preview side by side
+- **Edit before converting** — Make quick edits to cells before generating the PDF
+- **Conversion history** — Access your previously converted files anytime
 
 ---
 
 ## Features
 
-- **Always on top** — Floating notes that stay visible over all other windows
-- **Notes list panel** — Browse, search, and pin-to-top your favorite notes
-- **Rich highlighting** — 5 highlighter colors (yellow, pink, green, blue, purple)
-- **Multiple note colors** — 8 pastel themes to color-code your notes
-- **Font switching** — Choose between Handwriting, Clean, and Mono fonts
-- **System tray** — Quick actions from the tray icon (new note, notes list, show all, quit)
-- **Global shortcuts** — Create notes and open the list from anywhere on your desktop
-- **Auto-save** — Notes save automatically with debounce, no manual saving needed
-- **Local storage** — JSON file persistence — no cloud, no account required
-- **Frameless windows** — Draggable, borderless windows that feel like real sticky notes
-- **Neumorphic design** — Soft, modern UI with subtle depth and shadows
+- **Drag & drop upload** — Simply drag your `.ipynb` file into the app
+- **Multi-document tabs** — Work with multiple notebooks at once
+- **Notebook preview** — View and edit your notebook content before conversion
+- **PDF preview** — See how your PDF will look before downloading
+- **Syntax highlighting** — Beautiful code highlighting for all major languages
+- **Markdown rendering** — Full markdown support with proper formatting
+- **Auto-open PDF** — Optionally open the PDF automatically after conversion
+- **Conversion history** — Track all your conversions with easy re-download
+- **Custom titlebar** — Modern, frameless window design
+- **Light theme** — Clean, professional interface
 
 ---
 
 ## Installation
 
-Download the latest release from the [Releases](https://github.com/AleenaTahir1/Pin-Notes/releases) page:
+Download the latest release from the [Releases](https://github.com/AleenaTahir1/Jupytify/releases) page:
 
 - **`.msi`** — Standard Windows installer (recommended)
 - **`.exe`** — NSIS installer
@@ -69,29 +55,22 @@ Download the latest release from the [Releases](https://github.com/AleenaTahir1/
 
 ### Quick Start
 
-1. **Launch PinNotes** — The app starts in the system tray
-2. **Create a note** — Press `Ctrl+Alt+P` or right-click the tray icon
-3. **Write anything** — Your note auto-saves as you type
-4. **Pick a color** — Click the palette icon to change note color
-5. **Highlight text** — Select text and choose a highlighter color
+1. **Launch Jupytify** — Open the application
+2. **Upload a notebook** — Drag & drop or click to browse for a `.ipynb` file
+3. **Preview** — View your notebook content in the preview panel
+4. **Convert** — Click "Convert to PDF" to generate the PDF
+5. **Download** — Save the PDF to your desired location
 
-### Keyboard Shortcuts
+### Editing
 
-| Shortcut | Action |
-|----------|--------|
-| **Ctrl+Alt+P** | Create a new note |
-| **Ctrl+Alt+L** | Open notes list |
+- Click the **Edit** button in the preview area to enable editing mode
+- Make changes to any cell's content
+- Click **Reconvert** to generate a new PDF with your changes
 
-### System Tray
+### Settings
 
-Right-click the tray icon for quick actions:
-
-| Action | Description |
-|--------|-------------|
-| **New Note** | Create a new sticky note |
-| **Notes List** | Open the notes list panel |
-| **Show All** | Bring all notes to the front |
-| **Quit** | Close PinNotes |
+- **Default Save Location** — Set a default folder for saving PDFs
+- **Auto-open PDF** — Automatically open PDFs after conversion
 
 ---
 
@@ -106,8 +85,8 @@ Right-click the tray icon for quick actions:
 ### Run Locally
 
 ```bash
-git clone https://github.com/AleenaTahir1/Pin-Notes.git
-cd Pin-Notes
+git clone https://github.com/AleenaTahir1/Jupytify.git
+cd Jupytify
 npm install
 npm run tauri dev
 ```
@@ -121,29 +100,23 @@ npm run tauri build
 ### Project Structure
 
 ```
-PinNotes/
+Jupytify/
 ├── src/                    # Frontend (React + TypeScript)
 │   ├── components/         # UI components
-│   │   ├── NoteWindow.tsx  # Individual sticky note
-│   │   ├── NotesList.tsx   # Notes list panel
-│   │   ├── NoteEditor.tsx  # Note content editor
-│   │   ├── ColorPicker.tsx # Note color selection
-│   │   ├── HighlighterPicker.tsx  # Text highlight colors
-│   │   ├── MarkdownRenderer.tsx   # Markdown preview
-│   │   ├── DeleteModal.tsx # Delete confirmation
-│   │   └── SpiralBinding.tsx      # Decorative spiral
-│   ├── hooks/              # Custom React hooks
-│   ├── store/              # Zustand state management
-│   ├── styles/             # CSS styles
-│   └── types.ts            # Shared types and constants
+│   │   ├── TitleBar.tsx    # Custom window titlebar
+│   │   ├── Sidebar.tsx     # Navigation sidebar
+│   │   ├── DocumentTabs.tsx # Multi-document tabs
+│   │   ├── FileUpload.tsx  # Drag & drop file upload
+│   │   ├── NotebookPreview.tsx  # Notebook content viewer/editor
+│   │   ├── PdfPreview.tsx  # PDF preview panel
+│   │   └── ConversionProgress.tsx # Conversion status
+│   ├── App.tsx             # Main application component
+│   └── main.tsx            # Entry point
 ├── src-tauri/              # Backend (Rust)
 │   └── src/
-│       ├── lib.rs          # App setup and plugin registration
-│       ├── commands.rs     # Tauri IPC command handlers
-│       ├── storage.rs      # JSON file persistence
-│       ├── window.rs       # Frameless window creation
-│       ├── hotkey.rs       # Global shortcut registration
-│       └── tray.rs         # System tray menu
+│       ├── lib.rs          # Tauri commands and app setup
+│       ├── converter.rs    # Notebook to HTML conversion
+│       └── pdf.rs          # HTML to PDF generation
 └── package.json
 ```
 
@@ -151,11 +124,11 @@ PinNotes/
 
 ## Tech Stack
 
-- **Frontend** — React 19, TypeScript, Zustand
+- **Frontend** — React 19, TypeScript, TailwindCSS
 - **Backend** — Rust, Tauri 2
-- **Animations** — Framer Motion
-- **Markdown** — react-markdown
-- **UI Style** — Neumorphic design
+- **PDF Generation** — headless_chrome
+- **Syntax Highlighting** — syntect
+- **Markdown** — pulldown_cmark
 - **Build** — Vite
 
 ---

@@ -1,4 +1,4 @@
-PinNotes Source Available License
+Jupytify Source Available License
 
 Copyright (c) 2026 Aleena Tahir
 
@@ -6,7 +6,7 @@ TERMS AND CONDITIONS
 
 1. DEFINITIONS
 
-   "Software" refers to PinNotes and all associated source code, documentation,
+   "Software" refers to Jupytify and all associated source code, documentation,
    and assets.
 
    "Commercial Use" means any use of the Software intended for or directed toward

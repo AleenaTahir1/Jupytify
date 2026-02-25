@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { save, open } from '@tauri-apps/plugin-dialog';
-import { Download, FolderOpen, RefreshCw, Edit3, Eye, Folder } from 'lucide-react';
+import { Download, FolderOpen, RefreshCw, Edit3, Eye, Folder, Clock, Trash2 } from 'lucide-react';
 import { TitleBar } from './components/TitleBar';
 import { Sidebar } from './components/Sidebar';
 import { DocumentTabs, type Document } from './components/DocumentTabs';
@@ -13,6 +13,13 @@ import { PdfPreview } from './components/PdfPreview';
 interface ConversionResult {
   pdf_path: string;
   html_path: string;
+}
+
+interface HistoryItem {
+  id: string;
+  fileName: string;
+  pdfPath: string;
+  convertedAt: string;
 }
 
 function generateId() {
@@ -41,6 +48,24 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [defaultSavePath, setDefaultSavePath] = useState<string>('');
   const [autoOpenPdf, setAutoOpenPdf] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('jupytify-history');
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error('Failed to load history:', e);
+      }
+    }
+  }, []);
+
+  // Save history to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('jupytify-history', JSON.stringify(history));
+  }, [history]);
 
   const activeDoc = documents.find(d => d.id === activeDocId) || documents[0];
 
@@ -118,6 +143,15 @@ function App() {
         isEdited: false,
       });
       setPreviewMode('pdf');
+
+      // Add to history
+      const historyItem: HistoryItem = {
+        id: generateId(),
+        fileName: activeDoc.file?.name || 'notebook.ipynb',
+        pdfPath: result.pdf_path,
+        convertedAt: new Date().toISOString(),
+      };
+      setHistory(prev => [historyItem, ...prev.slice(0, 49)]); // Keep last 50
 
       // Auto-open PDF if enabled
       if (autoOpenPdf && result.pdf_path) {
@@ -337,10 +371,74 @@ function App() {
             {activeView === 'history' && (
               <div className="h-full overflow-auto p-6">
                 <div className="max-w-2xl mx-auto">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-2">Conversion History</h2>
-                    <p className="text-gray-500">Your recent conversions will appear here.</p>
-                    <p className="text-gray-400 text-sm mt-4">Coming soon...</p>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-blue-500" />
+                        Conversion History
+                      </h2>
+                      {history.length > 0 && (
+                        <button
+                          onClick={() => setHistory([])}
+                          className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+                    {history.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400">
+                        <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No conversions yet</p>
+                        <p className="text-sm">Your converted files will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {history.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-700 truncate">{item.fileName}</p>
+                              <p className="text-xs text-gray-400">
+                                {new Date(item.convertedAt).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-4">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const defaultName = item.fileName.replace('.ipynb', '.pdf');
+                                    const savePath = await save({
+                                      defaultPath: defaultSavePath ? `${defaultSavePath}/${defaultName}` : defaultName,
+                                      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+                                    });
+                                    if (savePath) {
+                                      await invoke('save_pdf', { sourcePath: item.pdfPath, destPath: savePath });
+                                    }
+                                  } catch (e) {
+                                    console.error('Failed to save:', e);
+                                  }
+                                }}
+                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                title="Download PDF"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setHistory(prev => prev.filter(h => h.id !== item.id))}
+                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Remove from history"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
