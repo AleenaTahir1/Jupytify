@@ -3,6 +3,10 @@ use std::fs;
 use std::path::Path;
 
 pub fn html_to_pdf(html_path: &str, pdf_path: &str) -> Result<(), String> {
+    html_to_pdf_with_options(html_path, pdf_path, false)
+}
+
+pub fn html_to_pdf_with_options(html_path: &str, pdf_path: &str, landscape: bool) -> Result<(), String> {
     let browser = Browser::new(
         LaunchOptions::default_builder()
             .headless(true)
@@ -23,13 +27,20 @@ pub fn html_to_pdf(html_path: &str, pdf_path: &str) -> Result<(), String> {
     tab.wait_until_navigated()
         .map_err(|e| format!("Failed to wait for navigation: {}", e))?;
 
+    // Swap width/height for landscape
+    let (paper_width, paper_height) = if landscape {
+        (11.69, 8.27)  // A4 landscape
+    } else {
+        (8.27, 11.69)  // A4 portrait
+    };
+
     let pdf_options = PrintToPdfOptions {
-        landscape: Some(false),
+        landscape: Some(landscape),
         display_header_footer: Some(false),
         print_background: Some(true),
         scale: Some(1.0),
-        paper_width: Some(8.27),  // A4 width in inches
-        paper_height: Some(11.69), // A4 height in inches
+        paper_width: Some(paper_width),
+        paper_height: Some(paper_height),
         margin_top: Some(0.79),    // ~2cm in inches
         margin_bottom: Some(0.79), // ~2cm in inches
         margin_left: Some(0.98),   // ~2.5cm in inches

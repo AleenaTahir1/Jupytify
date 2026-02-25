@@ -39,25 +39,24 @@ export function FileUpload({ onFileSelect, selectedFile, onClear }: FileUploadPr
 
   if (selectedFile) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <File className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-gray-800 font-medium">{selectedFile.name}</p>
-              <p className="text-gray-500 text-sm">
-                {(selectedFile.size / 1024).toFixed(1)} KB
-              </p>
-            </div>
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 relative">
+        <button
+          onClick={onClear}
+          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-md transition-colors"
+          title="Clear file"
+        >
+          <X className="w-3.5 h-3.5 text-white" />
+        </button>
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+            <File className="w-6 h-6 text-blue-600" />
           </div>
-          <button
-            onClick={onClear}
-            className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+          <div className="flex-1 min-w-0">
+            <p className="text-gray-800 font-medium truncate">{selectedFile.name}</p>
+            <p className="text-gray-500 text-sm">
+              {(selectedFile.size / 1024).toFixed(1)} KB
+            </p>
+          </div>
         </div>
       </div>
     );

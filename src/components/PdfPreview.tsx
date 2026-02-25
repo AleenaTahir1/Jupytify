@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, ExternalLink } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 
 interface PdfPreviewProps {
@@ -28,6 +28,17 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
     }
   }, [htmlPath]);
 
+  const handleOpenInBrowser = async () => {
+    // Open the PDF file instead of HTML
+    if (pdfPath) {
+      try {
+        await invoke('open_pdf_file', { path: pdfPath });
+      } catch (err) {
+        console.error('Failed to open PDF in browser:', err);
+      }
+    }
+  };
+
   if (!pdfPath && !htmlPath) {
     return (
       <div className="h-full flex items-center justify-center text-gray-400">
@@ -52,14 +63,42 @@ export function PdfPreview({ pdfPath, htmlPath }: PdfPreviewProps) {
   }
 
   if (htmlContent) {
+    // Inject CSS for proper display - allow scrolling within iframe
+    const modifiedContent = htmlContent.replace(
+      '</head>',
+      `<style>
+        html, body { 
+          margin: 0 !important;
+          padding: 20px !important;
+          box-sizing: border-box !important;
+          background: white !important;
+        }
+      </style></head>`
+    );
+
     return (
-      <div className="h-full overflow-hidden">
-        <iframe
-          srcDoc={htmlContent}
-          className="w-full h-full border-0 bg-white"
-          title="PDF Preview"
-          sandbox="allow-same-origin"
-        />
+      <div className="h-full flex flex-col overflow-hidden bg-gray-200">
+        {/* Open in Browser button */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex justify-end">
+          <button
+            onClick={handleOpenInBrowser}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open in Browser
+          </button>
+        </div>
+        {/* PDF-like preview with proper scrolling */}
+        <div className="flex-1 overflow-hidden p-6">
+          <div className="h-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+            <iframe
+              srcDoc={modifiedContent}
+              className="w-full h-full border-0 bg-white"
+              title="PDF Preview"
+              sandbox="allow-same-origin"
+            />
+          </div>
+        </div>
       </div>
     );
   }

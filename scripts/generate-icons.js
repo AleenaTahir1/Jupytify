@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pngToIco from 'png-to-ico';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,32 +44,32 @@ async function generateIcons() {
     console.log(`Generated: ${name}`);
   }
 
-  // Generate ICO file (Windows icon) - use 256x256 as base
+  // Generate ICO file (Windows icon) using png-to-ico for proper format
   const icoPath = path.join(iconsDir, 'icon.ico');
-  const pngBuffer = await sharp(svgBuffer)
-    .resize(256, 256)
-    .png()
-    .toBuffer();
   
-  // For ICO, we'll create a simple version using the PNG
-  // Sharp doesn't directly support ICO, so we'll use png-to-ico approach
-  // For now, copy the 256x256 PNG and rename - user can convert manually or we use a different approach
+  // Generate multiple PNG sizes for ICO
+  const icoSizes = [16, 24, 32, 48, 64, 128, 256];
+  const tempPngPaths = [];
   
-  // Actually, let's generate multiple sizes for ICO
-  const icoSizes = [16, 32, 48, 64, 128, 256];
-  const icoBuffers = await Promise.all(
-    icoSizes.map(size => 
-      sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toBuffer()
-    )
-  );
+  for (const size of icoSizes) {
+    const tempPath = path.join(iconsDir, `temp_${size}.png`);
+    await sharp(svgBuffer)
+      .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toFile(tempPath);
+    tempPngPaths.push(tempPath);
+  }
   
-  // Create ICO file manually (ICO format)
-  const icoBuffer = createIco(icoBuffers, icoSizes);
+  // Use png-to-ico to create proper ICO file
+  const icoBuffer = await pngToIco(tempPngPaths);
   fs.writeFileSync(icoPath, icoBuffer);
-  console.log('Generated: icon.ico');
+  
+  // Clean up temp files
+  for (const tempPath of tempPngPaths) {
+    fs.unlinkSync(tempPath);
+  }
+  
+  console.log('Generated: icon.ico (with proper multi-resolution)');
 
   // Generate ICNS for macOS (just copy the largest PNG for now)
   const icnsPath = path.join(iconsDir, 'icon.icns');
@@ -77,56 +78,6 @@ async function generateIcons() {
   console.log('Note: icon.icns may need manual generation from icon.png');
   
   console.log('\nAll icons generated successfully!');
-}
-
-function createIco(pngBuffers, sizes) {
-  // ICO file format:
-  // Header (6 bytes) + Directory entries (16 bytes each) + Image data
-  
-  const numImages = pngBuffers.length;
-  const headerSize = 6;
-  const dirEntrySize = 16;
-  const dirSize = dirEntrySize * numImages;
-  
-  // Calculate offsets
-  let offset = headerSize + dirSize;
-  const offsets = pngBuffers.map(buf => {
-    const currentOffset = offset;
-    offset += buf.length;
-    return currentOffset;
-  });
-  
-  // Total size
-  const totalSize = offset;
-  const buffer = Buffer.alloc(totalSize);
-  
-  // Write header
-  buffer.writeUInt16LE(0, 0);      // Reserved
-  buffer.writeUInt16LE(1, 2);      // Type (1 = ICO)
-  buffer.writeUInt16LE(numImages, 4); // Number of images
-  
-  // Write directory entries
-  for (let i = 0; i < numImages; i++) {
-    const entryOffset = headerSize + (i * dirEntrySize);
-    const size = sizes[i];
-    const pngBuf = pngBuffers[i];
-    
-    buffer.writeUInt8(size >= 256 ? 0 : size, entryOffset);     // Width
-    buffer.writeUInt8(size >= 256 ? 0 : size, entryOffset + 1); // Height
-    buffer.writeUInt8(0, entryOffset + 2);                       // Color palette
-    buffer.writeUInt8(0, entryOffset + 3);                       // Reserved
-    buffer.writeUInt16LE(1, entryOffset + 4);                    // Color planes
-    buffer.writeUInt16LE(32, entryOffset + 6);                   // Bits per pixel
-    buffer.writeUInt32LE(pngBuf.length, entryOffset + 8);        // Image size
-    buffer.writeUInt32LE(offsets[i], entryOffset + 12);          // Image offset
-  }
-  
-  // Write image data
-  for (let i = 0; i < numImages; i++) {
-    pngBuffers[i].copy(buffer, offsets[i]);
-  }
-  
-  return buffer;
 }
 
 generateIcons().catch(console.error);

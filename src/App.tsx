@@ -46,8 +46,27 @@ function App() {
   const [activeView, setActiveView] = useState<'convert' | 'history' | 'settings' | 'help'>('convert');
   const [previewMode, setPreviewMode] = useState<'notebook' | 'pdf'>('notebook');
   const [isEditing, setIsEditing] = useState(false);
-  const [defaultSavePath, setDefaultSavePath] = useState<string>('');
-  const [autoOpenPdf, setAutoOpenPdf] = useState(false);
+  const [defaultSavePath, setDefaultSavePath] = useState<string>(() => {
+    return localStorage.getItem('jupytify-defaultSavePath') || '';
+  });
+  const [autoOpenPdf, setAutoOpenPdf] = useState(() => {
+    return localStorage.getItem('jupytify-autoOpenPdf') === 'true';
+  });
+  const [pdfOrientation, setPdfOrientation] = useState<'portrait' | 'landscape'>(() => {
+    return (localStorage.getItem('jupytify-pdfOrientation') as 'portrait' | 'landscape') || 'portrait';
+  });
+  const [pdfTheme, setPdfTheme] = useState<'light' | 'dark' | 'solarized'>(() => {
+    return (localStorage.getItem('jupytify-pdfTheme') as 'light' | 'dark' | 'solarized') || 'light';
+  });
+  const [codeTheme, setCodeTheme] = useState<'default' | 'monokai' | 'github' | 'vscode-dark'>(() => {
+    return (localStorage.getItem('jupytify-codeTheme') as 'default' | 'monokai' | 'github' | 'vscode-dark') || 'default';
+  });
+  const [pdfAuthor, setPdfAuthor] = useState(() => {
+    return localStorage.getItem('jupytify-pdfAuthor') || '';
+  });
+  const [showDateHeader, setShowDateHeader] = useState(() => {
+    return localStorage.getItem('jupytify-showDateHeader') === 'true';
+  });
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   // Load history from localStorage on mount
@@ -66,6 +85,35 @@ function App() {
   useEffect(() => {
     localStorage.setItem('jupytify-history', JSON.stringify(history));
   }, [history]);
+
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('jupytify-defaultSavePath', defaultSavePath);
+  }, [defaultSavePath]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-autoOpenPdf', autoOpenPdf.toString());
+  }, [autoOpenPdf]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-pdfOrientation', pdfOrientation);
+  }, [pdfOrientation]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-pdfTheme', pdfTheme);
+  }, [pdfTheme]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-codeTheme', codeTheme);
+  }, [codeTheme]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-pdfAuthor', pdfAuthor);
+  }, [pdfAuthor]);
+
+  useEffect(() => {
+    localStorage.setItem('jupytify-showDateHeader', showDateHeader.toString());
+  }, [showDateHeader]);
 
   const activeDoc = documents.find(d => d.id === activeDocId) || documents[0];
 
@@ -134,6 +182,13 @@ function App() {
       const result = await invoke<ConversionResult>('convert_notebook', {
         notebookBytes: bytes,
         fileName: activeDoc.file?.name || 'notebook.ipynb',
+        options: {
+          orientation: pdfOrientation,
+          theme: pdfTheme,
+          code_theme: codeTheme,
+          author: pdfAuthor,
+          show_date: showDateHeader,
+        },
       });
 
       updateDocument(activeDocId, { 
@@ -261,8 +316,8 @@ function App() {
                     />
                   </div>
 
-                  {/* Status */}
-                  {activeDoc.status !== 'idle' && (
+                  {/* Status - only show for success/error, not converting (button shows that) */}
+                  {(activeDoc.status === 'success' || activeDoc.status === 'error') && (
                     <div className="mb-4">
                       <ConversionProgress status={activeDoc.status} errorMessage={activeDoc.errorMessage} />
                     </div>
@@ -476,7 +531,7 @@ function App() {
                           Browse...
                         </button>
                       </div>
-                      <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100">
                         <div>
                           <p className="font-medium text-gray-700">Auto-open PDF</p>
                           <p className="text-sm text-gray-500">Open PDF after conversion</p>
@@ -487,6 +542,94 @@ function App() {
                             className="sr-only peer" 
                             checked={autoOpenPdf}
                             onChange={(e) => setAutoOpenPdf(e.target.checked)}
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* PDF Layout Section */}
+                    <h3 className="text-md font-semibold text-gray-700 mt-8 mb-4 pt-4 border-t border-gray-200">PDF Layout</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                          <p className="font-medium text-gray-700">Page Orientation</p>
+                          <p className="text-sm text-gray-500">Portrait or landscape layout</p>
+                        </div>
+                        <select 
+                          value={pdfOrientation}
+                          onChange={(e) => setPdfOrientation(e.target.value as 'portrait' | 'landscape')}
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        >
+                          <option value="portrait">Portrait</option>
+                          <option value="landscape">Landscape</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* PDF Themes Section */}
+                    <h3 className="text-md font-semibold text-gray-700 mt-8 mb-4 pt-4 border-t border-gray-200">PDF Themes</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                          <p className="font-medium text-gray-700">Document Theme</p>
+                          <p className="text-sm text-gray-500">Overall PDF appearance</p>
+                        </div>
+                        <select 
+                          value={pdfTheme}
+                          onChange={(e) => setPdfTheme(e.target.value as 'light' | 'dark' | 'solarized')}
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        >
+                          <option value="light">Light (Default)</option>
+                          <option value="dark">Dark Mode</option>
+                          <option value="solarized">Solarized</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                          <p className="font-medium text-gray-700">Code Syntax Theme</p>
+                          <p className="text-sm text-gray-500">Syntax highlighting style</p>
+                        </div>
+                        <select 
+                          value={codeTheme}
+                          onChange={(e) => setCodeTheme(e.target.value as 'default' | 'monokai' | 'github' | 'vscode-dark')}
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        >
+                          <option value="default">Default</option>
+                          <option value="monokai">Monokai</option>
+                          <option value="github">GitHub</option>
+                          <option value="vscode-dark">VS Code Dark</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Branding Section */}
+                    <h3 className="text-md font-semibold text-gray-700 mt-8 mb-4 pt-4 border-t border-gray-200">Branding & Headers</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                          <p className="font-medium text-gray-700">Author Name</p>
+                          <p className="text-sm text-gray-500">Shown in PDF header</p>
+                        </div>
+                        <input 
+                          type="text"
+                          value={pdfAuthor}
+                          onChange={(e) => setPdfAuthor(e.target.value)}
+                          placeholder="Your name"
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm w-48"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-700">Show Date Header</p>
+                          <p className="text-sm text-gray-500">Add conversion date to PDF</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={showDateHeader}
+                            onChange={(e) => setShowDateHeader(e.target.checked)}
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                         </label>

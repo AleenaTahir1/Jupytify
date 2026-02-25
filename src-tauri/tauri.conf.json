@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "jupytify-app",
+  "productName": "Jupytify",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.jupytify.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -24,6 +24,10 @@
         "minHeight": 600
       }
     ],
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": false
+    },
     "security": {
       "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data:; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-src 'self' asset: https://asset.localhost"
     },
