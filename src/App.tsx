@@ -88,6 +88,12 @@ function App() {
   const [showDateHeader, setShowDateHeader] = useState(() => {
     return localStorage.getItem('jupytify-showDateHeader') === 'true';
   });
+  const [pdfFont, setPdfFont] = useState<'sans' | 'serif'>(() => {
+    return (localStorage.getItem('jupytify-pdfFont') as 'sans' | 'serif') || 'sans';
+  });
+  const [appTheme, setAppTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('jupytify-appTheme') as 'light' | 'dark') || 'light';
+  });
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
@@ -105,6 +111,11 @@ function App() {
   useEffect(() => { localStorage.setItem('jupytify-codeTheme', codeTheme); }, [codeTheme]);
   useEffect(() => { localStorage.setItem('jupytify-pdfAuthor', pdfAuthor); }, [pdfAuthor]);
   useEffect(() => { localStorage.setItem('jupytify-showDateHeader', showDateHeader.toString()); }, [showDateHeader]);
+  useEffect(() => { localStorage.setItem('jupytify-pdfFont', pdfFont); }, [pdfFont]);
+  useEffect(() => {
+    localStorage.setItem('jupytify-appTheme', appTheme);
+    document.documentElement.classList.toggle('dark', appTheme === 'dark');
+  }, [appTheme]);
 
   const activeDoc = documents.find(d => d.id === activeDocId) || documents[0];
 
@@ -149,7 +160,7 @@ function App() {
       const bytes = Array.from(new TextEncoder().encode(contentToConvert));
       const result = await invoke<ConversionResult>('convert_notebook', {
         notebookBytes: bytes, fileName: activeDoc.file?.name || 'notebook.ipynb',
-        options: { orientation: pdfOrientation, theme: pdfTheme, code_theme: codeTheme, author: pdfAuthor, show_date: showDateHeader },
+        options: { orientation: pdfOrientation, theme: pdfTheme, code_theme: codeTheme, author: pdfAuthor, show_date: showDateHeader, font: pdfFont },
       });
       updateDocument(activeDocId, { pdfPath: result.pdf_path, htmlPath: result.html_path, status: 'success', isEdited: false });
       setPreviewMode('pdf');
@@ -158,7 +169,7 @@ function App() {
     } catch (error) {
       updateDocument(activeDocId, { status: 'error', errorMessage: error instanceof Error ? error.message : String(error) });
     }
-  }, [activeDoc, activeDocId, updateDocument, autoOpenPdf, pdfOrientation, pdfTheme, codeTheme, pdfAuthor, showDateHeader]);
+  }, [activeDoc, activeDocId, updateDocument, autoOpenPdf, pdfOrientation, pdfTheme, codeTheme, pdfAuthor, showDateHeader, pdfFont]);
 
   const handleDownload = useCallback(async () => {
     if (!activeDoc.pdfPath) return;
@@ -192,6 +203,45 @@ function App() {
     });
     setIsEditing(false);
   }, [activeDocId]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      switch (key) {
+        case 'o':
+          e.preventDefault();
+          document.getElementById('file-input')?.click();
+          break;
+        case 'enter':
+          if (activeDoc.notebookContent && activeDoc.status !== 'converting') {
+            e.preventDefault();
+            handleConvert();
+          }
+          break;
+        case 's':
+          e.preventDefault();
+          if (activeDoc.status === 'success') handleDownload();
+          break;
+        case 't':
+          e.preventDefault();
+          handleAddDocument();
+          break;
+        case 'w':
+          e.preventDefault();
+          handleCloseDocument(activeDocId);
+          break;
+        case 'd':
+          e.preventDefault();
+          setAppTheme(t => (t === 'dark' ? 'light' : 'dark'));
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeDoc, activeDocId, handleConvert, handleDownload, handleAddDocument, handleCloseDocument]);
 
   return (
     <div className="h-screen flex flex-col bg-pearl overflow-hidden">
@@ -370,8 +420,8 @@ function App() {
                   <div className="bg-snow rounded-xl border border-sand shadow-sm p-6">
                     <h2 className="text-[11px] font-semibold text-mute uppercase tracking-widest mb-5">General</h2>
                     <div className="flex items-center justify-between py-3.5 border-b border-sand/50">
-                      <div><p className="text-ink text-sm font-medium">Output Quality</p><p className="text-mute text-xs mt-0.5">PDF resolution</p></div>
-                      <select className="px-3 py-1.5 bg-pearl border border-sand rounded-lg text-xs text-ink"><option>High</option><option>Medium</option><option>Low</option></select>
+                      <div><p className="text-ink text-sm font-medium">Dark Mode</p><p className="text-mute text-xs mt-0.5">App appearance (Ctrl+D)</p></div>
+                      <Toggle checked={appTheme === 'dark'} onChange={(v) => setAppTheme(v ? 'dark' : 'light')} />
                     </div>
                     <div className="flex items-center justify-between py-3.5 border-b border-sand/50">
                       <div><p className="text-ink text-sm font-medium">Default Save Location</p><p className="text-mute text-xs mt-0.5 truncate max-w-[200px]">{defaultSavePath || 'Not set'}</p></div>
@@ -403,10 +453,16 @@ function App() {
                         <option value="light">Light</option><option value="dark">Dark Mode</option><option value="solarized">Solarized</option>
                       </select>
                     </div>
-                    <div className="flex items-center justify-between py-3.5">
+                    <div className="flex items-center justify-between py-3.5 border-b border-sand/50">
                       <div><p className="text-ink text-sm font-medium">Code Syntax</p><p className="text-mute text-xs mt-0.5">Highlighting style</p></div>
                       <select value={codeTheme} onChange={(e) => setCodeTheme(e.target.value as 'default' | 'monokai' | 'github' | 'vscode-dark')} className="px-3 py-1.5 bg-pearl border border-sand rounded-lg text-xs text-ink">
                         <option value="default">Default</option><option value="monokai">Monokai</option><option value="github">GitHub</option><option value="vscode-dark">VS Code Dark</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between py-3.5">
+                      <div><p className="text-ink text-sm font-medium">Body Font</p><p className="text-mute text-xs mt-0.5">Serif looks like LaTeX/Overleaf</p></div>
+                      <select value={pdfFont} onChange={(e) => setPdfFont(e.target.value as 'sans' | 'serif')} className="px-3 py-1.5 bg-pearl border border-sand rounded-lg text-xs text-ink">
+                        <option value="sans">Sans-serif</option><option value="serif">Serif (LaTeX-style)</option>
                       </select>
                     </div>
                   </div>
@@ -442,10 +498,29 @@ function App() {
                     <div className="border-t border-sand/50 pt-5">
                       <h2 className="text-[11px] font-semibold text-mute uppercase tracking-widest mb-4">Features</h2>
                       <ul className="text-ink/70 space-y-2 text-sm">
+                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> LaTeX math rendering with KaTeX</li>
+                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> Multi-language syntax highlighting</li>
                         <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> Edit notebook cells before conversion</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> Preview both notebook and PDF</li>
                         <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> Multiple documents with tabs</li>
                         <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-royal flex-shrink-0" /> Customizable themes and branding</li>
+                      </ul>
+                    </div>
+                    <div className="border-t border-sand/50 pt-5">
+                      <h2 className="text-[11px] font-semibold text-mute uppercase tracking-widest mb-4">Keyboard Shortcuts</h2>
+                      <ul className="text-ink/70 space-y-2 text-sm">
+                        {[
+                          ['Ctrl + O', 'Open notebook'],
+                          ['Ctrl + Enter', 'Convert to PDF'],
+                          ['Ctrl + S', 'Download PDF'],
+                          ['Ctrl + T', 'New tab'],
+                          ['Ctrl + W', 'Close tab'],
+                          ['Ctrl + D', 'Toggle dark mode'],
+                        ].map(([keys, label]) => (
+                          <li key={keys} className="flex items-center justify-between">
+                            <span>{label}</span>
+                            <kbd className="px-2 py-0.5 bg-pearl border border-sand rounded text-xs font-mono text-dim">{keys}</kbd>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>

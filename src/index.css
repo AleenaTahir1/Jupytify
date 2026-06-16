@@ -23,6 +23,29 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
+/* Dark mode: override the semantic color tokens so every component that uses
+   them (bg-snow, text-ink, border-sand, …) flips automatically. */
+.dark {
+  --color-pearl: #15171a;
+  --color-snow: #1d2024;
+  --color-linen: #1a1c20;
+  --color-sand: #2c3036;
+  --color-clay: #3a3f47;
+  --color-ink: #e8eaed;
+  --color-dim: #a8adb5;
+  --color-mute: #6f747c;
+  --color-royal: #3b82f6;
+  --color-royal-soft: #1b2536;
+  --color-royal-pale: #1e3358;
+  --color-royal-deep: #2563eb;
+  --color-clover: #22c55e;
+  --color-clover-soft: #14271c;
+  --color-crimson: #ef4444;
+  --color-crimson-soft: #2a1416;
+  --color-honey: #f59e0b;
+  color-scheme: dark;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
@@ -69,3 +92,44 @@ select {
   background-position: right 10px center;
   padding-right: 30px;
 }
+
+/* Rendered markdown in the notebook preview */
+.md-body h1, .md-body h2, .md-body h3, .md-body h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0.6em 0 0.35em;
+  color: var(--color-ink);
+}
+.md-body h1 { font-size: 1.5em; border-bottom: 1px solid var(--color-sand); padding-bottom: 0.2em; }
+.md-body h2 { font-size: 1.25em; border-bottom: 1px solid var(--color-sand); padding-bottom: 0.15em; }
+.md-body h3 { font-size: 1.1em; }
+.md-body p { margin: 0.5em 0; line-height: 1.6; }
+.md-body ul, .md-body ol { margin: 0.5em 0; padding-left: 1.5em; }
+.md-body li { margin: 0.2em 0; }
+.md-body a { color: var(--color-royal); text-decoration: underline; }
+.md-body code {
+  background: var(--color-pearl);
+  border: 1px solid var(--color-sand);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.md-body pre {
+  background: var(--color-pearl);
+  border: 1px solid var(--color-sand);
+  border-radius: 6px;
+  padding: 0.75em;
+  overflow-x: auto;
+}
+.md-body pre code { background: none; border: none; padding: 0; }
+.md-body blockquote {
+  border-left: 3px solid var(--color-clay);
+  margin: 0.5em 0;
+  padding-left: 0.8em;
+  color: var(--color-dim);
+}
+.md-body table { border-collapse: collapse; margin: 0.6em 0; }
+.md-body th, .md-body td { border: 1px solid var(--color-sand); padding: 0.35em 0.7em; }
+.md-body th { background: var(--color-pearl); font-weight: 600; }
+.md-body img { max-width: 100%; }

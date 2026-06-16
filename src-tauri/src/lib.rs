@@ -19,6 +19,7 @@ struct PdfOptions {
     code_theme: Option<String>,
     author: Option<String>,
     show_date: Option<bool>,
+    font: Option<String>,
 }
 
 #[tauri::command]
@@ -32,6 +33,7 @@ async fn convert_notebook(
 
     let opts = options.unwrap_or_default();
     let is_landscape = opts.orientation.as_deref() == Some("landscape");
+    let serif = opts.font.as_deref() == Some("serif");
     let html_content = converter::notebook_to_html_with_options(
         &notebook_json,
         opts.theme.as_deref(),
@@ -39,6 +41,7 @@ async fn convert_notebook(
         opts.author.as_deref(),
         opts.show_date.unwrap_or(false),
         is_landscape,
+        serif,
     )?;
 
     let temp_path = env::temp_dir().join("jupytify");
@@ -54,7 +57,6 @@ async fn convert_notebook(
     let html_path_str = html_path.to_string_lossy().to_string();
     let pdf_path_str = pdf_path.to_string_lossy().to_string();
 
-    let is_landscape = opts.orientation.as_deref() == Some("landscape");
     pdf::html_to_pdf_with_options(&html_path_str, &pdf_path_str, is_landscape)?;
 
     Ok(ConversionResult {

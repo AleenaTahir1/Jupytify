@@ -1,5 +1,50 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { Code, FileText } from 'lucide-react';
+import { marked } from 'marked';
+import renderMathInElement from 'katex/contrib/auto-render';
+
+// Render markdown to HTML while shielding LaTeX math from the markdown parser,
+// then typeset the math with KaTeX (mirrors the PDF pipeline).
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderMarkdown(src: string): string {
+  const math: string[] = [];
+  const stash = (m: string) => `@@MATH${math.push(m) - 1}@@`;
+  const protectedSrc = src
+    .replace(/\$\$([\s\S]+?)\$\$/g, stash)
+    .replace(/\\\[([\s\S]+?)\\\]/g, stash)
+    .replace(/\$(?!\s)([^\n$]+?)\$/g, stash)
+    .replace(/\\\(([\s\S]+?)\\\)/g, stash);
+  let html = marked.parse(protectedSrc, { async: false }) as string;
+  math.forEach((m, i) => {
+    html = html.replace(`@@MATH${i}@@`, escapeHtml(m));
+  });
+  return html;
+}
+
+function MarkdownCell({ source }: { source: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const html = useMemo(() => renderMarkdown(source), [source]);
+  useEffect(() => {
+    if (!ref.current) return;
+    try {
+      renderMathInElement(ref.current, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '$', right: '$', display: false },
+        ],
+        throwOnError: false,
+      });
+    } catch {
+      /* ignore math render errors in preview */
+    }
+  }, [html]);
+  return <div ref={ref} className="md-body text-sm text-ink/90" dangerouslySetInnerHTML={{ __html: html }} />;
+}
 
 interface NotebookCell {
   cell_type: string;
@@ -139,6 +184,8 @@ export function NotebookPreview({ content, onCellEdit, editable = false }: Noteb
                 value={getCellSource(cell.source)}
                 onChange={(e) => onCellEdit?.(index, e.target.value)}
               />
+            ) : cell.cell_type === 'markdown' ? (
+              <MarkdownCell source={getCellSource(cell.source)} />
             ) : (
               <pre className="font-mono text-xs whitespace-pre-wrap overflow-x-auto text-ink/80">
                 {getCellSource(cell.source)}

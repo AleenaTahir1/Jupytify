@@ -3,10 +3,6 @@ use std::fs;
 use std::path::Path;
 use std::time::Duration;
 
-pub fn html_to_pdf(html_path: &str, pdf_path: &str) -> Result<(), String> {
-    html_to_pdf_with_options(html_path, pdf_path, false)
-}
-
 pub fn html_to_pdf_with_options(html_path: &str, pdf_path: &str, landscape: bool) -> Result<(), String> {
     let browser = Browser::new(
         LaunchOptions::default_builder()
@@ -32,8 +28,27 @@ pub fn html_to_pdf_with_options(html_path: &str, pdf_path: &str, landscape: bool
     tab.wait_for_element("#notebook-container")
         .map_err(|e| format!("Failed to wait for content: {}", e))?;
 
-    // Give the browser a moment to finish rendering (images, layout, etc.)
-    std::thread::sleep(Duration::from_millis(500));
+    // Wait until KaTeX has finished rendering math and webfonts have loaded,
+    // so the printed layout matches the fully-rendered page. Falls back to a
+    // fixed delay if the checks never resolve.
+    let deadline = std::time::Instant::now() + Duration::from_secs(8);
+    loop {
+        let ready = tab
+            .evaluate(
+                "(window.__katexDone === true) && document.fonts.status === 'loaded'",
+                false,
+            )
+            .ok()
+            .and_then(|r| r.value)
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        if ready || std::time::Instant::now() >= deadline {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    // Small settle for final layout/paint.
+    std::thread::sleep(Duration::from_millis(150));
 
     // Swap width/height for landscape
     let (paper_width, paper_height) = if landscape {
